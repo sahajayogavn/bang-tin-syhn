@@ -1,250 +1,533 @@
 import { SYEvent, SYTask } from '../types/event';
 
-export const INITIAL_TASKS: SYTask[] = [
-  // Tasks cho hn-seat-tour-2026
+export const INITIAL_EVENTS: SYEvent[] = [
   {
-    id: 'TASK-01',
-    eventId: 'hn-seat-tour-2026',
-    title: 'Nộp hồ sơ xin cấp phép biểu diễn nghệ thuật quốc tế',
-    description: 'Nộp hồ sơ gồm danh sách nghệ sĩ nước ngoài (Áo, Ý, Ấn Độ), nội dung bài hát và kịch bản lên Sở VH&TT Hà Nội theo Nghị định 144.',
-    assignee: 'Tuấn Minh',
-    assigneePhone: '0912 888 999',
+    id: 'seat-tour-2026',
+    title: 'SEAT Tour 2026, địa điểm Hà Nội',
+    timeStatus: 'upcoming',
+    timeStatusLabel: 'Sắp diễn ra',
+    startDate: '2026-10-30',
+    endDate: '2026-11-03',
+    time: 'Cả ngày (Lịch trình lưu diễn)',
+    locationName: 'Nhiều địa điểm ở Hà Nội & Hưng Yên',
+    address: 'Nhiều địa điểm ở Hà Nội & Hưng Yên',
+    district: 'Hà Nội & Hưng Yên',
+    coordinator: 'Ngọc Anh',
+    coordinatorPhone: '',
+    importance: 'critical',
+    badge: 'SEAT',
+    summary: 'Chương trình lưu diễn âm nhạc tâm linh quốc tế Đông Nam Á (SEAT Tour 2026) với các nghệ sĩ quốc tế tại Hà Nội và Hưng Yên.',
+    details: `1. MỤC TIÊU:
+- Đón tiếp đoàn nghệ sĩ quốc tế và tổ chức các đêm nhạc thiền cổ điển kết hợp Khai mở Năng lượng Kundalini.
+- Phối hợp biểu diễn tại nhiều địa điểm văn hóa, nhà hát tại Hà Nội và Hưng Yên.
+
+2. CÁC HẠNG MỤC TRỌNG YẾU:
+- Hoàn thiện hồ sơ xin cấp phép biểu diễn nghệ thuật người nước ngoài (Sở VH&TT Hà Nội).
+- Khảo sát và ký hợp đồng địa điểm biểu diễn.
+- Đón tiếp, visa, phương tiện di chuyển 29 chỗ và nơi lưu trú cho đoàn nghệ sĩ.
+- Truyền thông cộng đồng, phát hành thư mời và đăng ký vé miễn phí.`,
+    checklistSummary: 'Đang làm hồ sơ cấp phép Sở VH&TT • Khảo sát địa điểm • Lên danh sách TNV'
+  },
+  {
+    id: 'national-puja-vn-2026',
+    title: 'Puja National 2026, TP. Hồ Chí Minh',
+    timeStatus: 'upcoming',
+    timeStatusLabel: 'Sắp diễn ra',
+    startDate: 'Cuối năm 2026',
+    time: 'Theo lịch trình Puja',
+    locationName: 'TP. Hồ Chí Minh',
+    address: 'TP. Hồ Chí Minh',
+    district: 'TP. HCM',
+    coordinator: 'Collective',
+    coordinatorPhone: '',
+    importance: 'critical',
+    badge: 'PUJA',
+    summary: 'Đại lễ Puja Toàn Quốc 2026 quy tụ thiền sinh Sahaja Yoga từ ba miền Bắc - Trung - Nam tại TP. Hồ Chí Minh.',
+    details: `1. MỤC TIÊU:
+- Tăng cường rung động tập thể quốc gia, đón tiếp các yogi từ các tỉnh thành về tham dự.
+
+2. CÔNG TÁC PHỐI HỢP CỦA HÀ NỘI:
+- Lên danh sách đoàn thiền sinh Hà Nội & miền Bắc đăng ký tham dự.
+- Phối hợp đặt vé máy bay/tàu và chỗ ở tập trung tại TP.HCM.
+- Chuẩn bị các tiết mục dâng hoa, âm nhạc bhajan đóng góp cho đại lễ.`,
+    checklistSummary: 'Chuẩn bị thông báo đăng ký đoàn Hà Nội tham dự'
+  },
+  {
+    id: 'havan-puja',
+    title: 'Havan & Puja',
+    timeStatus: 'upcoming',
+    timeStatusLabel: 'Sắp diễn ra',
+    startDate: 'Theo lịch tập thể',
+    time: 'Buổi sáng',
+    locationName: 'Ashram / Địa điểm tập thể',
+    address: 'Hà Nội',
+    district: 'Hà Nội',
+    coordinator: 'Collective',
+    coordinatorPhone: '',
+    importance: 'high',
+    badge: 'PUJA',
+    summary: 'Nghi thức Havan thanh lọc lửa thiêng và buổi lễ Puja truyền thống của tập thể Sahaja Yoga Hà Nội.',
+    details: `1. NỘI DUNG:
+- Chuẩn bị củi gỗ thanh sạch, bơ ghee, thảo mộc samagri cho nghi thức Havan thanh lọc các luân xa.
+- Buổi lễ Puja thành kính dâng lên Đức Mẹ Shri Mataji Nirmala Devi.
+
+2. PHÂN CÔNG:
+- Ban chuẩn bị vật phẩm lễ (hoa tươi, trái cây, prasadam).
+- Ban âm thanh & ca nhạc Bhajan.`,
+    checklistSummary: 'Lên lịch ngày tổ chức phù hợp & chuẩn bị vật phẩm Havan'
+  },
+  {
+    id: 'navaratri-2026',
+    title: 'Navaratri 2026',
+    timeStatus: 'upcoming',
+    timeStatusLabel: 'Sắp diễn ra',
+    startDate: 'Tháng 10/2026',
+    time: '9 đêm liên tục',
+    locationName: 'Các trung tâm & Trực tuyến Zoom',
+    address: 'Hà Nội',
+    district: 'Hà Nội',
+    coordinator: 'Collective',
+    coordinatorPhone: '',
+    importance: 'high',
+    badge: 'NAVARATRI',
+    summary: 'Đại lễ 9 đêm tôn vinh 9 hình thái Năng Lượng Thần Thánh Shri Durga thanh lọc toàn bộ hệ thống thần kinh tinh tế.',
+    details: `1. KẾ HOẠCH:
+- Tổ chức thiền tập thể mỗi tối đón nhận rung động của từng khía cạnh năng lượng.
+- Đọc bài giảng của Shri Mataji về ý nghĩa của Navaratri và chiến thắng của sự thật.
+- Chuẩn bị trang phục truyền thống và các bài hát ngợi ca.`,
+    checklistSummary: 'Lên khung giờ thiền 9 đêm & tài liệu bài giảng'
+  },
+  {
+    id: 'seeker-class-vtv-14h30',
+    title: 'Lớp seeker 14h30-15h30 Chủ Nhật hàng tuần, 40 Vương Thừa Vũ',
+    timeStatus: 'ongoing',
+    timeStatusLabel: 'Đang diễn ra',
+    startDate: '2026-03-26',
+    time: '14:30 - 15:30 (Chủ Nhật hàng tuần)',
+    locationName: '40 Vương Thừa Vũ, Thanh Xuân, Hà Nội',
+    address: '40 Vương Thừa Vũ, Thanh Xuân, Hà Nội',
+    district: 'Thanh Xuân',
+    coordinator: 'Bảo Linh',
+    coordinatorPhone: '081.447.8038',
+    importance: 'normal',
+    badge: 'SEEKER',
+    summary: 'Lớp thiền nhập môn buổi chiều Chủ Nhật dành cho người mới tìm hiểu về hệ thống năng lượng Kundalini.',
+    details: `1. ĐỐI TƯỢNG:
+- Người mới bắt đầu, người tìm kiếm chân lý (Seekers).
+
+2. NỘI DUNG BUỔI HỌC:
+- Trải nghiệm Khai mở năng lượng (Self-Realization).
+- Hướng dẫn nhận biết rung động mát/ấm trên đầu ngón tay.
+- Thực hành trạng thái Không Suy Nghĩ (Thoughtless Awareness).`,
+    checklistSummary: 'Duy trì đều đặn hàng tuần • Có thiền sinh hỗ trợ trực tiếp'
+  },
+  {
+    id: 'seeker-class-vtv-15h30',
+    title: 'Lớp seeker 15h30-17h00 Chủ Nhật hàng tuần, 40 Vương Thừa Vũ',
+    timeStatus: 'ongoing',
+    timeStatusLabel: 'Đang diễn ra',
+    startDate: '2026-03-26',
+    time: '15:30 - 17:00 (Chủ Nhật hàng tuần)',
+    locationName: '40 Vương Thừa Vũ, Thanh Xuân, Hà Nội',
+    address: '40 Vương Thừa Vũ, Thanh Xuân, Hà Nội',
+    district: 'Thanh Xuân',
+    coordinator: 'Bảo Linh',
+    coordinatorPhone: '081.447.8038',
+    importance: 'normal',
+    badge: 'SEEKER',
+    summary: 'Lớp nâng cao kỹ thuật thanh lọc (Footsoaking, Nến) và kiến thức các luân xa cho học viên sau nhập môn.',
+    details: `1. NỘI DUNG CHUYÊN SÂU:
+- Thực hành kỹ thuật ngâm chân nước muối (Footsoaking) cân bằng Kênh Phải và Kênh Trái.
+- Tìm hiểu chuyên sâu từng luân xa: Mooladhara, Swadhishthana, Nabhi, Anahat...
+- Nghe trích đoạn bài giảng âm thanh/video có phụ đề tiếng Việt.`,
+    checklistSummary: 'Chuẩn bị đầy đủ chậu ngâm chân và tài liệu học tập'
+  },
+  {
+    id: 'seeker-class-hqv-20h',
+    title: 'Lớp seeker 20h00-21h00, Số 72 ngõ 106 Hoàng Quốc Việt',
+    timeStatus: 'ongoing',
+    timeStatusLabel: 'Đang diễn ra',
+    startDate: '2026-08-09',
+    time: '20:00 - 21:00 (Tối định kỳ)',
+    locationName: 'Số 72 ngõ 106 Hoàng Quốc Việt, Cầu Giấy, Hà Nội',
+    address: 'Số 72 ngõ 106 Hoàng Quốc Việt, Cầu Giấy, Hà Nội',
+    district: 'Cầu Giấy',
+    coordinator: 'Lê Thi',
+    coordinatorPhone: '093.232.8800',
+    importance: 'normal',
+    badge: 'SEEKER',
+    summary: 'Điểm thiền khu vực Cầu Giấy - Bắc Từ Liêm, hỗ trợ người mới trải nghiệm tĩnh lặng và giải tỏa căng thẳng sau giờ làm việc.',
+    details: `1. THỜI GIAN & ĐỊA ĐIỂM:
+- Số 72 ngõ 106 Hoàng Quốc Việt (có chỗ để xe thuận tiện).
+- 20:00 - 21:00 tối.
+
+2. NỘI DUNG:
+- Giới thiệu thiền định Sahaja Yoga tự nhiên, không mất phí.
+- Hướng dẫn thực hành thiền tập thể buổi tối.`,
+    checklistSummary: 'Đang duy trì ổn định mỗi tuần'
+  },
+  {
+    id: 'seeker-class-online-21h',
+    title: 'Lớp thực hành thiền online 21h00-21h30 Tối Thứ 3, 5, 7 (Duy trì từ năm 2023)',
+    timeStatus: 'ongoing',
+    timeStatusLabel: 'Đang diễn ra',
+    startDate: '2023-10-10',
+    time: '21:00 - 21:30 (Tối Thứ 3, 5, 7 hàng tuần)',
+    locationName: 'Trực tuyến qua Zoom / Google Meet',
+    address: 'Online / Zoom',
+    district: 'Online',
+    coordinator: 'Hùng bé',
+    coordinatorPhone: '036.666.7975',
+    importance: 'normal',
+    badge: 'SEEKER',
+    summary: 'Phòng thiền trực tuyến 30 phút mỗi tối 3-5-7 giúp học viên cả nước duy trì thói quen thiền định đều đặn trước khi ngủ.',
+    details: `1. HÌNH THỨC:
+- Mở phòng Zoom định kỳ 20:55, bắt đầu thiền 21:00 - 21:30.
+- Dành cho tất cả những ai không có điều kiện đến trung tâm trực tiếp.
+
+2. NỘI DUNG:
+- Cùng nâng Kundalini, tạo Bandhan bảo vệ năng lượng.
+- Nghe nhạc Ragas hoặc bài hát tĩnh tâm và thiền trong im lặng.`,
+    checklistSummary: 'Duy trì liên tục từ tháng 10/2023 đến nay'
+  },
+  {
+    id: 'dich-thuat',
+    title: 'Dịch sách và tài liệu Sahaja Yoga',
+    timeStatus: 'ongoing',
+    timeStatusLabel: 'Đang diễn ra',
+    startDate: 'Dự án liên tục',
+    time: 'Làm việc linh hoạt theo nhóm',
+    locationName: 'Online / Google Drive',
+    address: 'Hà Nội',
+    district: 'Hà Nội',
+    coordinator: 'Bảo Linh',
+    coordinatorPhone: '081.447.8038',
+    importance: 'normal',
+    badge: 'CONTENT',
+    summary: 'Dự án dịch thuật, hiệu đính các ấn phẩm sách, cẩm nang hướng dẫn và phụ đề bài giảng của Shri Mataji sang tiếng Việt.',
+    details: `1. MỤC TIÊU:
+- Hoàn thiện bản dịch các đầu sách nền tảng cho người mới và thiền sinh.
+- Biên dịch tài liệu phát tay cho các đợt sự kiện lớn như SEAT Tour.
+- Hiệu đính thuật ngữ năng lượng tinh tế chuẩn xác, trong sáng.`,
+    checklistSummary: 'Đang dịch các chương sách mới & tờ gấp SEAT Tour'
+  },
+  {
+    id: 'seeker-class-md-20h30',
+    title: 'Lớp seeker 20h00-21h00 tại toà nhà Sông Đà, đường Phạm Hùng, Mỹ Đình',
+    timeStatus: 'past',
+    timeStatusLabel: 'Đã kết thúc',
+    startDate: '2026-04-09',
+    endDate: '2026-06-12',
+    time: '20:00 - 21:00',
+    locationName: 'Toà nhà Sông Đà, đường Phạm Hùng, Mỹ Đình, Nam Từ Liêm',
+    address: 'Toà nhà Sông Đà, đường Phạm Hùng, Mỹ Đình',
+    district: 'Nam Từ Liêm',
+    coordinator: 'Vũ Hiền',
+    coordinatorPhone: '098.937.2066',
+    importance: 'normal',
+    badge: 'SEEKER',
+    summary: 'Khóa học seeker quý 2/2026 khu vực Mỹ Đình đã hoàn thành tốt đẹp với hơn 30 học viên tốt nghiệp.',
+    details: `1. KẾT QUẢ:
+- Đã tổ chức thành công chuỗi 10 buổi học thiền nhập môn cho nhân viên văn phòng khu vực Mỹ Đình.
+- Đã kết nối các học viên vào các điểm thiền định kỳ tiếp theo tại Hà Nội.`,
+    checklistSummary: 'Đã hoàn thành khóa học và bàn giao mặt bằng'
+  }
+];
+
+export const INITIAL_TASKS: SYTask[] = [
+  // ==========================================
+  // DỰ ÁN 1: SEAT Tour 2026 (seat-tour-2026)
+  // ==========================================
+  {
+    id: 'SEAT-01',
+    eventId: 'seat-tour-2026',
+    title: 'Hồ sơ xin cấp phép biểu diễn nghệ thuật người nước ngoài (Sở VH&TT)',
+    description: 'Chuẩn bị văn bản đề nghị, danh sách 12 nghệ sĩ nước ngoài (hộ chiếu, quốc tịch), danh mục bài hát/nhạc phẩm Ragas, kịch bản chương trình theo Nghị định 144.',
+    assignee: 'Ngọc Anh',
+    assigneePhone: '0912.888.999',
     status: 'in_progress',
     priority: 'high',
     dueDate: '2026-09-30',
     dependsOn: [],
-    deliverable: 'Giấy tiếp nhận hồ sơ Sở VH&TT HN'
+    deliverable: 'Biên nhận nộp hồ sơ hoặc Giấy chấp thuận của Sở VH&TT HN'
   },
   {
-    id: 'TASK-02',
-    eventId: 'hn-seat-tour-2026',
-    title: 'Ký hợp đồng thuê khán phòng Nhà Hát & đặt cọc',
-    description: 'Chốt hợp đồng âm thanh, ánh sáng, máy chiếu và khu vực đón tiếp khách VIP.',
-    assignee: 'Hồng Nhung',
-    assigneePhone: '0988 333 444',
-    status: 'done',
+    id: 'SEAT-02',
+    eventId: 'seat-tour-2026',
+    title: 'Khảo sát & chốt hợp đồng địa điểm biểu diễn tại Hà Nội & Hưng Yên',
+    description: 'Làm việc với Ban quản lý hội trường (Cung Hữu nghị / Nhà hát), chốt âm thanh, ánh sáng, máy chiếu, khu vực đón tiếp và đặt cọc.',
+    assignee: 'Đức Huy',
+    assigneePhone: '0977.111.222',
+    status: 'in_progress',
     priority: 'high',
-    dueDate: '2026-09-20',
+    dueDate: '2026-10-05',
     dependsOn: [],
     deliverable: 'Hợp đồng thuê địa điểm đã ký'
   },
   {
-    id: 'TASK-03',
-    eventId: 'hn-seat-tour-2026',
-    title: 'Thiết kế Poster, Banner & Thư mời đại biểu',
-    description: 'Thiết kế bộ nhận diện SEAT Tour 2026 chuẩn brand Sahaja Yoga, in ấn thư mời cứng cho các đối tác văn hóa.',
-    assignee: 'Đức Huy',
-    assigneePhone: '0977 111 222',
+    id: 'SEAT-03',
+    eventId: 'seat-tour-2026',
+    title: 'Thiết kế bộ nhận diện SEAT Tour 2026 (Poster, Banner, Thư mời)',
+    description: 'Thiết kế poster điện tử, backdrop sân khấu, standee chỉ dẫn và mẫu thư mời đại biểu in ấn theo quy chuẩn thương hiệu.',
+    assignee: 'Hồng Nhung',
+    assigneePhone: '0988.333.444',
     status: 'in_progress',
     priority: 'high',
-    dueDate: '2026-10-05',
-    dependsOn: ['TASK-02'], // Link: Cần chốt địa điểm trước
-    deliverable: 'File Figma + Maket in ấn'
+    dueDate: '2026-10-08',
+    dependsOn: ['SEAT-02'], // Cần có địa điểm cụ thể để đưa lên poster
+    deliverable: 'File thiết kế in ấn & maket sân khấu'
   },
   {
-    id: 'TASK-04',
-    eventId: 'hn-seat-tour-2026',
-    title: 'Chạy chiến dịch truyền thông & mở link đăng ký vé miễn phí',
-    description: 'Đăng bài fanpage, gửi email cho cộng đồng và mở form đăng ký giữ chỗ trực tuyến.',
-    assignee: 'Phương Lan',
-    assigneePhone: '0904 555 666',
+    id: 'SEAT-04',
+    eventId: 'seat-tour-2026',
+    title: 'Chạy truyền thông trực tuyến & mở link đăng ký vé miễn phí',
+    description: 'Đăng bài thông báo lên Fanpage, nhóm Zalo cộng đồng, gửi thư mời điện tử và mở form đăng ký giữ chỗ.',
+    assignee: 'Thanh Hằng',
+    assigneePhone: '0912.345.678',
     status: 'todo',
     priority: 'high',
-    dueDate: '2026-10-07',
-    dependsOn: ['TASK-01', 'TASK-03'], // Link: Cần xong Giấy phép & Thiết kế
-    deliverable: 'Link form Google Form & Bài ghim Fanpage'
+    dueDate: '2026-10-12',
+    dependsOn: ['SEAT-01', 'SEAT-03'], // Phải có cấp phép & poster hoàn chỉnh mới được truyền thông rộng rãi
+    deliverable: 'Form đăng ký Google Form & bài truyền thông công khai'
   },
   {
-    id: 'TASK-05',
-    eventId: 'hn-seat-tour-2026',
-    title: 'Sắp xếp khách sạn & đưa đón đoàn nghệ sĩ quốc tế',
-    description: 'Đặt phòng cho 12 nghệ sĩ quốc tế, xe 29 chỗ đưa đón sân bay Nội Bài và lịch trình ăn uống thanh tịnh.',
+    id: 'SEAT-05',
+    eventId: 'seat-tour-2026',
+    title: 'Hậu cần: Đặt khách sạn, xe đưa đón 29 chỗ & ăn uống cho đoàn nghệ sĩ',
+    description: 'Đặt phòng nghỉ gần địa điểm biểu diễn, thuê xe 29 chỗ đưa đón sân bay Nội Bài và các điểm diễn ở Hưng Yên, chuẩn bị thực đơn ăn thanh tịnh.',
     assignee: 'Khánh Linh',
-    assigneePhone: '0936 777 888',
+    assigneePhone: '0936.777.888',
+    status: 'todo',
+    priority: 'medium',
+    dueDate: '2026-10-15',
+    dependsOn: ['SEAT-01'], // Phụ thuộc vào thủ tục visa & cấp phép biểu diễn
+    deliverable: 'Bảng xác nhận đặt phòng & lịch trình xe chạy'
+  },
+  {
+    id: 'SEAT-06',
+    eventId: 'seat-tour-2026',
+    title: 'Tập huấn đội Tình nguyện viên đón tiếp & Trải nghiệm Luân xa',
+    description: 'Họp 20 tình nguyện viên: phân công vị trí check-in, hướng dẫn ghế ngồi khán giả, chuẩn bị khu vực trải nghiệm Kundalini và phát cẩm nang sau giờ diễn.',
+    assignee: 'Bảo Linh',
+    assigneePhone: '081.447.8038',
+    status: 'todo',
+    priority: 'medium',
+    dueDate: '2026-10-25',
+    dependsOn: ['SEAT-04'],
+    deliverable: 'Bảng phân công nhiệm vụ TNV & danh sách trực ca'
+  },
+
+  // ==========================================
+  // DỰ ÁN 2: Lớp Seeker 40 Vương Thừa Vũ (seeker-class-vtv-14h30)
+  // ==========================================
+  {
+    id: 'VTV1-01',
+    eventId: 'seeker-class-vtv-14h30',
+    title: 'Trực phòng thiền & đón tiếp học viên mới Chủ Nhật',
+    description: 'Mở cửa trước 15 phút, bật điều hòa, chuẩn bị nước ấm, đón học viên mới và hướng dẫn chỗ ngồi thoải mái.',
+    assignee: 'Bảo Linh',
+    assigneePhone: '081.447.8038',
+    status: 'done',
+    priority: 'high',
+    dueDate: 'Hàng tuần',
+    dependsOn: [],
+    deliverable: 'Phòng thiền sẵn sàng trước 14h15'
+  },
+  {
+    id: 'VTV1-02',
+    eventId: 'seeker-class-vtv-14h30',
+    title: 'In ấn bổ sung tờ gấp "Trải Nghiệm Khai Mở Năng Lượng"',
+    description: 'In thêm 100 bản tờ gấp màu giới thiệu 3 kênh, 7 luân xa để phát cho người mới đến lần đầu.',
+    assignee: 'Bảo Linh',
+    assigneePhone: '081.447.8038',
+    status: 'in_progress',
+    priority: 'medium',
+    dueDate: '2026-09-28',
+    dependsOn: [],
+    deliverable: '100 tờ gấp tại kệ tài liệu 40 VTV'
+  },
+
+  // ==========================================
+  // DỰ ÁN 3: Lớp Nâng Cao 15h30 Vương Thừa Vũ (seeker-class-vtv-15h30)
+  // ==========================================
+  {
+    id: 'VTV2-01',
+    eventId: 'seeker-class-vtv-15h30',
+    title: 'Chuẩn bị muối sạch & chậu ngâm chân Footsoaking',
+    description: 'Kiểm tra số lượng chậu, mua bổ sung muối hạt sạch và khăn lau chân phục vụ lớp thực hành ngâm chân nước muối.',
+    assignee: 'Bảo Linh',
+    assigneePhone: '081.447.8038',
+    status: 'done',
+    priority: 'medium',
+    dueDate: 'Hàng tuần',
+    dependsOn: [],
+    deliverable: '30 bộ chậu + muối sẵn sàng tại góc thực hành'
+  },
+  {
+    id: 'VTV2-02',
+    eventId: 'seeker-class-vtv-15h30',
+    title: 'Chọn lọc video bài giảng Shri Mataji có phụ đề tiếng Việt',
+    description: 'Chuẩn bị sẵn trích đoạn bài giảng 15-20 phút về luân xa Nabhi và kỹ thuật cân bằng năng lượng để phát máy chiếu.',
+    assignee: 'Hùng bé',
+    assigneePhone: '036.666.7975',
+    status: 'in_progress',
+    priority: 'medium',
+    dueDate: '2026-09-27',
+    dependsOn: [],
+    deliverable: 'Link drive video phụ đề chất lượng cao'
+  },
+
+  // ==========================================
+  // DỰ ÁN 4: Lớp Hoàng Quốc Việt (seeker-class-hqv-20h)
+  // ==========================================
+  {
+    id: 'HQV-01',
+    eventId: 'seeker-class-hqv-20h',
+    title: 'Duy trì mở cửa & điều phối lớp học tối tại 72 ngõ 106 HQV',
+    description: 'Đón tiếp thiền sinh và người mới khu vực Cầu Giấy, Tây Hồ, hướng dẫn thiền và kiểm tra rung động trên tay.',
+    assignee: 'Lê Thi',
+    assigneePhone: '093.232.8800',
+    status: 'done',
+    priority: 'high',
+    dueDate: 'Hàng tuần',
+    dependsOn: [],
+    deliverable: 'Báo cáo số lượng người tham dự sau mỗi buổi'
+  },
+  {
+    id: 'HQV-02',
+    eventId: 'seeker-class-hqv-20h',
+    title: 'Lập nhóm Zalo hỗ trợ thiền sinh lớp HQV tự thiền tại nhà',
+    description: 'Gửi link nhạc thiền, bài đọc mỗi ngày vào nhóm Zalo để hỗ trợ người mới duy trì đều đặn sáng tối.',
+    assignee: 'Lê Thi',
+    assigneePhone: '093.232.8800',
+    status: 'done',
+    priority: 'medium',
+    dueDate: '2026-08-15',
+    dependsOn: ['HQV-01'],
+    deliverable: 'Nhóm Zalo lớp HQV hoạt động tích cực'
+  },
+
+  // ==========================================
+  // DỰ ÁN 5: Lớp Thiền Online Zoom (seeker-class-online-21h)
+  // ==========================================
+  {
+    id: 'ONL-01',
+    eventId: 'seeker-class-online-21h',
+    title: 'Mở phòng Zoom & chọn nhạc thiền tối 3, 5, 7',
+    description: 'Host phòng Zoom lúc 20:55, phát nhạc tĩnh tâm nhẹ nhàng, hướng dẫn bandhan và giữ phòng thiền yên tĩnh.',
+    assignee: 'Hùng bé',
+    assigneePhone: '036.666.7975',
+    status: 'done',
+    priority: 'high',
+    dueDate: 'Hàng tuần (3-5-7)',
+    dependsOn: [],
+    deliverable: 'Phòng Zoom hoạt động đều đặn đúng 21h00'
+  },
+  {
+    id: 'ONL-02',
+    eventId: 'seeker-class-online-21h',
+    title: 'Ghi hình & chia sẻ trích đoạn ngắn lên kênh truyền thông nội bộ',
+    description: 'Cắt các đoạn chia sẻ trải nghiệm hay của thiền sinh trong lớp online để truyền cảm hứng cho người mới.',
+    assignee: 'Hùng bé',
+    assigneePhone: '036.666.7975',
+    status: 'in_progress',
+    priority: 'low',
+    dueDate: '2026-10-01',
+    dependsOn: ['ONL-01'],
+    deliverable: 'Các video clip ngắn 1-2 phút'
+  },
+
+  // ==========================================
+  // DỰ ÁN 6: Dịch thuật tài liệu (dich-thuat)
+  // ==========================================
+  {
+    id: 'DT-01',
+    eventId: 'dich-thuat',
+    title: 'Dịch & biên tập tờ gấp giới thiệu SEAT Tour 2026',
+    description: 'Dịch phần giới thiệu nghệ sĩ quốc tế và lời giải thích ngắn gọn về Kundalini cho tờ rơi phát tay tại đêm nhạc.',
+    assignee: 'Bảo Linh',
+    assigneePhone: '081.447.8038',
+    status: 'in_progress',
+    priority: 'high',
+    dueDate: '2026-10-02',
+    dependsOn: [],
+    deliverable: 'Bản thảo dịch tiếng Việt đã duyệt ngữ pháp'
+  },
+  {
+    id: 'DT-02',
+    eventId: 'dich-thuat',
+    title: 'Hiệu đính sách "Sahaja Yoga - Con Đường Tự Nhiên"',
+    description: 'Rà soát lại thuật ngữ luân xa, đối chiếu với nguyên bản tiếng Anh để chuẩn bị tái bản phục vụ thiền sinh.',
+    assignee: 'Bảo Linh',
+    assigneePhone: '081.447.8038',
+    status: 'in_progress',
+    priority: 'medium',
+    dueDate: '2026-11-15',
+    dependsOn: [],
+    deliverable: 'Bản thảo hoàn thiện 12 chương sách'
+  },
+
+  // ==========================================
+  // DỰ ÁN 7: Havan & Puja (havan-puja)
+  // ==========================================
+  {
+    id: 'PUJA-01',
+    eventId: 'havan-puja',
+    title: 'Khảo sát địa điểm ngoài trời thoáng đãng cho nghi thức Havan',
+    description: 'Tìm địa điểm có bãi đất trống, an toàn phòng cháy chữa cháy để thực hiện nghi thức thiêu đốt thanh lọc lửa thiêng.',
+    assignee: 'Đức Huy',
+    assigneePhone: '0977.111.222',
+    status: 'todo',
+    priority: 'high',
+    dueDate: '2026-10-10',
+    dependsOn: [],
+    deliverable: 'Địa điểm được tập thể thống nhất'
+  },
+  {
+    id: 'PUJA-02',
+    eventId: 'havan-puja',
+    title: 'Chuẩn bị củi gỗ thanh sạch, bơ Ghee & thảo mộc Samagri',
+    description: 'Mua bơ sữa bò nguyên chất tự làm Ghee, gom củi khô sạch không khói và thảo dược Ấn Độ chuyên dụng.',
+    assignee: 'Lê Thi',
+    assigneePhone: '093.232.8800',
     status: 'todo',
     priority: 'medium',
     dueDate: '2026-10-12',
-    dependsOn: ['TASK-01'], // Link: Sau khi duyệt visa & cấp phép
-    deliverable: 'Bảng xác nhận phòng & lịch trình xe đón'
-  },
-  {
-    id: 'TASK-06',
-    eventId: 'hn-seat-tour-2026',
-    title: 'Tập huấn đội ngũ Tình nguyện viên đón tiếp & Trải nghiệm Luân xa',
-    description: 'Phân công 25 tình nguyện viên hỗ trợ check-in, hướng dẫn chỗ ngồi và bàn trải nghiệm Kundalini sau biểu diễn.',
-    assignee: 'Thanh Hằng',
-    assigneePhone: '0912 345 678',
-    status: 'todo',
-    priority: 'medium',
-    dueDate: '2026-10-15',
-    dependsOn: ['TASK-04'], // Link: Sau khi có danh sách đăng ký
-    deliverable: 'Bảng phân công vị trí TNV'
+    dependsOn: ['PUJA-01'],
+    deliverable: 'Đầy đủ vật phẩm Havan sẵn sàng'
   },
 
-  // Tasks cho hn-khoa-hoc-thang10
+  // ==========================================
+  // DỰ ÁN 8: Navaratri 2026 (navaratri-2026)
+  // ==========================================
   {
-    id: 'TASK-11',
-    eventId: 'hn-khoa-hoc-thang10',
-    title: 'Biên soạn tài liệu 4 buổi học nhập môn & in ấn tờ gấp',
-    description: 'Cập nhật giáo trình 3 kênh năng lượng, 7 luân xa và kỹ thuật ngâm chân nước muối.',
-    assignee: 'Bác Tuấn',
-    assigneePhone: '0936 111 222',
-    status: 'done',
+    id: 'NAV-01',
+    eventId: 'navaratri-2026',
+    title: 'Lên lịch trình thiền 9 đêm Navaratri & danh sách bài giảng',
+    description: 'Tổng hợp danh sách các khía cạnh Shakti tương ứng từng đêm, trích bài giảng của Shri Mataji và gửi thông báo cho tập thể.',
+    assignee: 'Bảo Linh',
+    assigneePhone: '081.447.8038',
+    status: 'todo',
     priority: 'high',
-    dueDate: '2026-09-18',
+    dueDate: '2026-10-01',
     dependsOn: [],
-    deliverable: 'Tài liệu PDF & 200 bản in màu'
+    deliverable: 'Lịch trình chi tiết 9 đêm gửi vào nhóm chung'
   },
+
+  // ==========================================
+  // DỰ ÁN 9: National Puja TP.HCM (national-puja-vn-2026)
+  // ==========================================
   {
-    id: 'TASK-12',
-    eventId: 'hn-khoa-hoc-thang10',
-    title: 'Setup phòng thiền & hệ thống âm thanh Cầu Giấy',
-    description: 'Chuẩn bị thảm ngồi, loa kiểm âm cho nhạc Ragas và chậu ngâm chân thực hành.',
-    assignee: 'Việt Anh',
-    assigneePhone: '0982 444 555',
-    status: 'in_progress',
-    priority: 'medium',
-    dueDate: '2026-10-15',
-    dependsOn: ['TASK-11'],
-    deliverable: 'Phòng thiền hoàn thiện sẵn sàng đón người mới'
-  },
-  {
-    id: 'TASK-13',
-    eventId: 'hn-khoa-hoc-thang10',
-    title: 'Gửi SMS & Zalo nhắc lịch cho học viên đã đăng ký',
-    description: 'Nhắn tin địa chỉ cụ thể, hướng dẫn gửi xe và trang phục thoải mái trước ngày khai giảng.',
-    assignee: 'Thanh Hằng',
-    assigneePhone: '0912 345 678',
+    id: 'NAT-01',
+    eventId: 'national-puja-vn-2026',
+    title: 'Mở biểu mẫu đăng ký đoàn Hà Nội & miền Bắc tham dự Puja TP.HCM',
+    description: 'Thống kê số lượng thiền sinh tham gia, hỗ trợ gom nhóm mua vé máy bay giá tốt và đăng ký phòng nghỉ tập trung với ban tổ chức TP.HCM.',
+    assignee: 'Ngọc Anh',
+    assigneePhone: '0912.888.999',
     status: 'todo',
-    priority: 'medium',
-    dueDate: '2026-10-19',
-    dependsOn: ['TASK-12'],
-    deliverable: 'Báo cáo 100% học viên đã nhận tin nhắn'
-  },
-
-  // Tasks cho hn-tong-ket-quy3
-  {
-    id: 'TASK-21',
-    eventId: 'hn-tong-ket-quy3',
-    title: 'Tổng hợp số liệu người mới trải nghiệm quý 3/2026',
-    description: 'Thống kê lượng người tham gia các lớp nhập môn tại Hà Nội và tỷ lệ duy trì sinh hoạt định kỳ.',
-    assignee: 'Tuấn Minh',
-    assigneePhone: '0912 888 999',
-    status: 'done',
-    priority: 'medium',
-    dueDate: '2026-09-15',
+    priority: 'high',
+    dueDate: '2026-10-20',
     dependsOn: [],
-    deliverable: 'Báo cáo Google Slides tổng kết quý'
-  }
-];
-
-export const INITIAL_EVENTS: SYEvent[] = [
-  {
-    id: 'hn-seat-tour-2026',
-    title: 'Đại Nhạc Hội Thiền Cổ Điển SEAT Tour 2026 & Trải Nghiệm Khai Mở Năng Lượng Kundalini',
-    timeStatus: 'upcoming',
-    timeStatusLabel: 'Sắp diễn ra',
-    startDate: '18/10/2026',
-    time: '19:30 - 21:30 (Tối Chủ Nhật)',
-    locationName: 'Cung Văn Hóa Lao Động Hữu Nghị Việt Xô (Hội trường lớn)',
-    address: '91 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội',
-    district: 'Hoàn Kiếm',
-    coordinator: 'Tuấn Minh (Trưởng Ban Tổ Chức)',
-    coordinatorPhone: '0912 888 999',
-    importance: 'critical',
-    badge: 'TRỌNG TÂM QUỐC GIA',
-    summary: 'Chương trình biểu diễn âm nhạc tâm linh quốc tế quy mô 1.000 khán giả với sự tham gia của các nghệ sĩ Áo, Ý, Ấn Độ và Việt Nam, kết hợp trải nghiệm Giác Ngộ trực tiếp.',
-    details: `1. MỤC TIÊU SỰ KIỆN:
-- Giới thiệu nghệ thuật âm nhạc cổ điển Ragas Ấn Độ và những rung động thanh lọc tâm trí đến đông đảo công chúng Hà Nội.
-- Đem lại trải nghiệm Giác Ngộ Tự Thân (Self-Realization) trực tiếp và hoàn toàn miễn phí cho trên 1.000 khán giả.
-- Kết nối các thiền sinh và bạn yêu thiền trên toàn miền Bắc.
-
-2. CÁC NỘI DUNG CHÍNH:
-- 18:30 - 19:30: Đón tiếp đại biểu, phát tờ gấp và trải nghiệm sơ khởi tại sảnh.
-- 19:30 - 19:50: Lời chào mừng, giới thiệu ý nghĩa triết lý hòa bình của Shri Mataji Nirmala Devi.
-- 19:50 - 20:40: Phần trình diễn nhạc cụ truyền thống: Sitar, Harmonium, Tabla và các làn điệu Ragas cổ điển.
-- 20:40 - 21:10: Hướng dẫn trải nghiệm Khai mở năng lượng Kundalini tập thể.
-- 21:10 - 21:30: Tiết mục đại hợp xướng quốc tế và kết thúc.
-
-3. LƯU Ý ĐIỀU PHỐI NỘI BỘ:
-- Đang gấp rút hoàn tất thủ tục cấp phép biểu diễn nghệ sĩ nước ngoài với Sở Văn Hóa & Thể Thao Hà Nội.
-- Phân công đội ngũ TNV hỗ trợ đón đoàn nghệ sĩ sân bay Nội Bài ngày 16/10/2026.`,
-    checklistSummary: 'Đã ký HĐ địa điểm • Đang xin phép Sở VH&TT • Chuẩn bị in ấn poster & mở đăng ký'
-  },
-  {
-    id: 'hn-khoa-hoc-thang10',
-    title: 'Khóa Học Thiền Nhập Môn K42: "Tìm Lại Sự Tĩnh Lặng & Cân Bằng Năng Lượng"',
-    timeStatus: 'ongoing',
-    timeStatusLabel: 'Đang triển khai',
-    startDate: '20/10/2026',
-    endDate: '10/11/2026',
-    time: '19:00 - 20:30 (Thứ Ba & Thứ Năm hàng tuần)',
-    locationName: 'Trung Tâm Sahaja Yoga Cầu Giấy',
-    address: 'Tầng 4, Tòa nhà Detech, Số 8 Tôn Thất Thuyết, Mỹ Đình 2, Nam Từ Liêm',
-    district: 'Cầu Giấy',
-    coordinator: 'Thanh Hằng',
-    coordinatorPhone: '0912 345 678',
-    importance: 'high',
-    badge: 'LỚP ĐỊNH KỲ THÁNG 10',
-    summary: 'Chuỗi 4 buổi học nhập môn chuyên sâu dành cho người mới sau sự kiện SEAT Tour, tiếp sức duy trì thiền định mỗi ngày tại nhà.',
-    details: `1. KẾ HOẠCH BÀI GIẢNG 4 BUỔI:
-- Buổi 1 (20/10): Giới thiệu hệ thống năng lượng tinh tế (3 kênh, 7 luân xa), trải nghiệm Không Suy Nghĩ.
-- Buổi 2 (27/10): Kênh Trái (Cảm xúc, quá khứ) & Kỹ thuật thanh lọc yếu tố Lửa/Nến.
-- Buổi 3 (03/11): Kênh Phải (Hành động, tương lai) & Kỹ thuật thanh lọc yếu tố Nước/Ngâm chân nước muối.
-- Buổi 4 (10/11): Kênh Giữa (Hiện tại, tiến hóa) & Thực hành duy trì rung động mát lành.
-
-2. CÔNG TÁC HẬU CẦN:
-- Chuẩn bị đủ 50 bộ chậu ngâm chân + muối sạch cho buổi 3.
-- In sẵn 200 cuốn cẩm nang thiền mini phát tận tay học viên.`,
-    checklistSummary: 'Đã hoàn tất tài liệu • Đang setup phòng thiền • Dự kiến 60 học viên tham dự'
-  },
-  {
-    id: 'hn-thien-ngoai-troi-hotay',
-    title: 'Buổi Thiền Ngoài Trời & Giao Lưu Kết Nối Thanh Lọc Thiên Nhiên Bên Hồ Tây',
-    timeStatus: 'upcoming',
-    timeStatusLabel: 'Sắp diễn ra',
-    startDate: '25/10/2026',
-    time: '06:00 - 08:30 (Sáng Chủ Nhật)',
-    locationName: 'Bến Hàn Quốc / Vườn hoa ven Hồ Tây',
-    address: 'Đường Nguyễn Đình Thi, Bưởi, Tây Hồ, Hà Nội',
-    district: 'Tây Hồ',
-    coordinator: 'Minh Đức',
-    coordinatorPhone: '0904 999 888',
-    importance: 'normal',
-    badge: 'THIÊN NHIÊN & KẾT NỐI',
-    summary: 'Hoạt động dã ngoại đón bình minh, thiền định cùng các nguyên tố tự nhiên (Nước Hồ Tây, Gió mát) và dùng điểm tâm nhẹ.',
-    details: `1. LỊCH TRÌNH:
-- 06:00: Tập trung tại khu vực bãi cỏ ven hồ.
-- 06:15 - 07:15: Thiền buổi sớm đón nắng mai, kết nối nguyên tố Đất và Nước.
-- 07:15 - 08:30: Thưởng trà, điểm tâm nhẹ và chia sẻ cảm nhận tu tập.
-
-2. CHUẨN BỊ NỘI BỘ:
-- Thiền sinh tự mang theo thảm ngồi hoặc khăn trải.
-- Ban hậu cần chuẩn bị trà ấm và bánh ngọt.`,
-    checklistSummary: 'Đã khảo sát địa điểm • Chuẩn bị thông báo nhóm Zalo thiền sinh'
-  },
-  {
-    id: 'hn-tong-ket-quy3',
-    title: 'Hội Nghị Tổng Kết Hoạt Động Thiền Định Quý 3 & Định Hướng Tour Cuối Năm',
-    timeStatus: 'past',
-    timeStatusLabel: 'Đã diễn ra',
-    startDate: '15/09/2026',
-    time: '14:00 - 17:30 (Chiều Thứ Bảy)',
-    locationName: 'Trung Tâm Sahaja Yoga Đống Đa',
-    address: 'Số 168 Xã Đàn, Nam Đồng, Đống Đa, Hà Nội',
-    district: 'Đống Đa',
-    coordinator: 'Bác Tuấn',
-    coordinatorPhone: '0936 111 222',
-    importance: 'normal',
-    badge: 'ĐÃ HOÀN TẤT',
-    summary: 'Đánh giá các lớp học đã mở trong quý 3, phân công nhân sự các tiểu ban phục vụ sự kiện biểu diễn quốc tế SEAT Tour 2026.',
-    details: `1. KẾT QUẢ ĐẠT ĐƯỢC:
-- Quý 3 đã mở thành công 3 khóa học với hơn 140 học viên mới tại Cầu Giấy và Đống Đa.
-- Thành lập Ban Chỉ Đạo chuẩn bị SEAT Tour 2026 gồm 5 tiểu ban: Cấp phép, Hậu cần, Âm thanh, Truyền thông và Đón tiếp.
-
-2. CÁC NGHỊ QUYẾT ĐÃ THÔNG QUA:
-- Ưu tiên 100% nguồn lực cho sự kiện biểu diễn tháng 10/2026.
-- Phê duyệt ngân sách dự trù in ấn và thuê địa điểm.`,
-    checklistSummary: 'Đã lưu biên bản cuộc họp & gửi slide tổng kết cho các trưởng nhóm'
+    deliverable: 'Bảng danh sách đoàn tham dự & thông tin chuyến bay'
   }
 ];

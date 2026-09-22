@@ -3,7 +3,8 @@ import { SYEvent, SYTask } from '../types/event';
 import { INITIAL_EVENTS, INITIAL_TASKS } from '../data/mockEvents';
 
 /**
- * Utility to fetch and parse events and tasks from Google Sheets published as CSV
+ * Utility to fetch and parse events and tasks from Google Sheets.
+ * If user provides 1 Sheet with Events, or 2 GIDs (gid=0 for Events, gid=xxx for Tasks).
  */
 export async function fetchEventsFromGoogleSheet(sheetUrl?: string): Promise<{
   events: SYEvent[];
@@ -19,13 +20,18 @@ export async function fetchEventsFromGoogleSheet(sheetUrl?: string): Promise<{
 
   try {
     let csvUrl = targetUrl.trim();
+    let sheetBase = '';
+    let sheetId = '';
+    let currentGid = '0';
+
     if (csvUrl.includes('docs.google.com/spreadsheets/d/')) {
       const match = csvUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
       if (match && match[1]) {
-        const sheetId = match[1];
+        sheetId = match[1];
         const gidMatch = csvUrl.match(/[#&?]gid=([0-9]+)/);
-        const gid = gidMatch ? gidMatch[1] : '0';
-        csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+        currentGid = gidMatch ? gidMatch[1] : '0';
+        sheetBase = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+        csvUrl = `${sheetBase}&gid=${currentGid}`;
       }
     }
 
@@ -48,58 +54,108 @@ export async function fetchEventsFromGoogleSheet(sheetUrl?: string): Promise<{
     }
 
     const rows = parsed.data;
-    const mappedEvents: SYEvent[] = rows.map((row, index) => {
-      const getVal = (...keys: string[]) => {
-        for (const k of keys) {
-          if (row[k] !== undefined && row[k].trim() !== '') return row[k].trim();
-          const foundKey = Object.keys(row).find(
-            rk => rk.toLowerCase().trim() === k.toLowerCase().trim()
-          );
-          if (foundKey && row[foundKey] && row[foundKey].trim() !== '') {
-            return row[foundKey].trim();
-          }
+
+    // Detect if this sheet is a Task sheet or an Event sheet
+    const firstRowKeys = rows.length > 0 ? Object.keys(rows[0]).map(k => k.toLowerCase().trim()) : [];
+    const isTaskSheet = firstRowKeys.includes('assignee') || firstRowKeys.includes('người phụ trách') || firstRowKeys.includes('eventid');
+
+    let mappedEvents: SYEvent[] = [];
+    let mappedTasks: SYTask[] = INITIAL_TASKS;
+
+    const getVal = (row: Record<string, string>, ...keys: string[]) => {
+      for (const k of keys) {
+        if (row[k] !== undefined && row[k].trim() !== '') return row[k].trim();
+        const foundKey = Object.keys(row).find(
+          rk => rk.toLowerCase().trim() === k.toLowerCase().trim()
+        );
+        if (foundKey && row[foundKey] && row[foundKey].trim() !== '') {
+          return row[foundKey].trim();
         }
-        return '';
-      };
-
-      const title = getVal('title', 'Tên sự kiện', 'Tiêu đề');
-      if (!title) return null;
-
-      const rawTimeStatus = getVal('timeStatus', 'Thời gian', 'Tiến độ', 'Trạng thái').toLowerCase();
-      let timeStatus: 'past' | 'ongoing' | 'upcoming' = 'upcoming';
-      if (rawTimeStatus.includes('đã') || rawTimeStatus.includes('past') || rawTimeStatus.includes('xong')) {
-        timeStatus = 'past';
-      } else if (rawTimeStatus.includes('đang') || rawTimeStatus.includes('ongoing')) {
-        timeStatus = 'ongoing';
       }
+      return '';
+    };
 
-      return {
-        id: getVal('id', 'Mã sự kiện') || `evt-${index + 1}`,
-        title,
-        timeStatus,
-        timeStatusLabel: getVal('timeStatusLabel', 'Nhãn trạng thái') || (
-          timeStatus === 'upcoming' ? 'Sắp diễn ra' : timeStatus === 'ongoing' ? 'Đang diễn ra' : 'Đã diễn ra'
-        ),
-        startDate: getVal('startDate', 'Ngày diễn ra', 'Ngày bắt đầu') || 'Chưa cập nhật',
-        endDate: getVal('endDate', 'Ngày kết thúc'),
-        time: getVal('time', 'Giờ diễn ra') || '19:30 - 21:00',
-        locationName: getVal('locationName', 'Địa điểm') || 'Hà Nội',
-        address: getVal('address', 'Địa chỉ') || 'Hà Nội',
-        district: getVal('district', 'Quận/Huyện') || 'Hà Nội',
-        coordinator: getVal('coordinator', 'Người phụ trách', 'Người điều phối') || 'Ban Tổ Chức',
-        coordinatorPhone: getVal('coordinatorPhone', 'SĐT người phụ trách', 'Hotline') || '',
-        importance: (getVal('importance', 'Mức độ quan trọng').toLowerCase() as any) || 'high',
-        badge: getVal('badge', 'Thẻ nổi bật', 'Huy hiệu'),
-        summary: getVal('summary', 'Tóm tắt sự kiện', 'Mô tả ngắn'),
-        details: getVal('details', 'Nội dung chi tiết', 'Kế hoạch chi tiết'),
-        checklistSummary: getVal('checklistSummary', 'Tình trạng công việc')
-      };
-    }).filter(Boolean) as SYEvent[];
+    if (isTaskSheet) {
+      // Parse tasks
+      mappedTasks = rows.map((row, index) => {
+        const title = getVal(row, 'title', 'Tên công việc', 'Tên task');
+        if (!title) return null;
+        const rawStatus = getVal(row, 'status', 'Trạng thái').toLowerCase();
+        let status: SYTask['status'] = 'todo';
+        if (rawStatus.includes('đang') || rawStatus.includes('in_progress')) status = 'in_progress';
+        else if (rawStatus.includes('duyệt') || rawStatus.includes('review')) status = 'review';
+        else if (rawStatus.includes('xong') || rawStatus.includes('done') || rawStatus.includes('hoàn thành')) status = 'done';
+
+        const rawDepends = getVal(row, 'dependsOn', 'Phụ thuộc', 'Task tiền đề');
+        const dependsOn = rawDepends ? rawDepends.split(/[,;\n]/).map(s => s.trim()).filter(Boolean) : [];
+
+        return {
+          id: getVal(row, 'id', 'Mã task') || `TASK-${index + 1}`,
+          eventId: getVal(row, 'eventId', 'Mã dự án', 'Mã sự kiện') || 'seat-tour-2026',
+          title,
+          description: getVal(row, 'description', 'Mô tả chi tiết'),
+          assignee: getVal(row, 'assignee', 'Người phụ trách') || 'Chưa phân công',
+          assigneePhone: getVal(row, 'assigneePhone', 'SĐT người phụ trách', 'Hotline'),
+          status,
+          priority: (getVal(row, 'priority', 'Mức độ ưu tiên').toLowerCase() as any) || 'medium',
+          dueDate: getVal(row, 'dueDate', 'Hạn hoàn thành', 'Deadline'),
+          dependsOn,
+          deliverable: getVal(row, 'deliverable', 'Sản phẩm bàn giao', 'Kết quả')
+        };
+      }).filter(Boolean) as SYTask[];
+      mappedEvents = INITIAL_EVENTS;
+    } else {
+      // Parse events
+      mappedEvents = rows.map((row, index) => {
+        const title = getVal(row, 'title', 'Tên sự kiện', 'Tiêu đề');
+        if (!title) return null;
+
+        const rawTimeStatus = getVal(row, 'timeStatus', 'Thời gian', 'Tiến độ', 'Trạng thái').toLowerCase();
+        let timeStatus: 'past' | 'ongoing' | 'upcoming' = 'upcoming';
+        if (rawTimeStatus.includes('đã') || rawTimeStatus.includes('past') || rawTimeStatus.includes('xong') || rawTimeStatus.includes('kết thúc')) {
+          timeStatus = 'past';
+        } else if (rawTimeStatus.includes('đang') || rawTimeStatus.includes('ongoing')) {
+          timeStatus = 'ongoing';
+        }
+
+        const rawImportance = getVal(row, 'importance', 'Mức độ quan trọng');
+        let importance: SYEvent['importance'] = 'normal';
+        if (rawImportance.includes('★★★★★') || rawImportance.toLowerCase().includes('critical') || rawImportance.includes('5')) {
+          importance = 'critical';
+        } else if (rawImportance.includes('★★★★') || rawImportance.toLowerCase().includes('high') || rawImportance.includes('4')) {
+          importance = 'high';
+        }
+
+        const address = getVal(row, 'address', 'Địa chỉ');
+        const startDate = getVal(row, 'startDate', 'Ngày bắt đầu');
+        const endDate = getVal(row, 'endDate', 'Ngày kết thúc');
+
+        return {
+          id: getVal(row, 'id', 'Mã sự kiện') || `evt-${index + 1}`,
+          title,
+          timeStatus,
+          timeStatusLabel: timeStatus === 'upcoming' ? 'Sắp diễn ra' : timeStatus === 'ongoing' ? 'Đang diễn ra' : 'Đã kết thúc',
+          startDate: startDate === '-' ? 'Định kỳ' : startDate || 'Chưa ấn định',
+          endDate: endDate === '-' ? '' : endDate,
+          time: getVal(row, 'time', 'Giờ diễn ra') || 'Theo lịch trình',
+          locationName: address || 'Hà Nội',
+          address: address || 'Hà Nội',
+          district: address || 'Hà Nội',
+          coordinator: getVal(row, 'coordinator', 'Người phụ trách') || 'Collective',
+          coordinatorPhone: getVal(row, 'coordinatorPhone', 'SĐT người phụ trách') || '',
+          importance,
+          badge: getVal(row, 'badge', 'Nhãn', 'Tag') || 'SỰ KIỆN',
+          summary: getVal(row, 'summary', 'Tóm tắt sự kiện'),
+          details: getVal(row, 'details', 'Nội dung chi tiết'),
+          checklistSummary: getVal(row, 'checklistSummary', 'Tình trạng công việc')
+        };
+      }).filter(Boolean) as SYEvent[];
+    }
 
     return {
       events: mappedEvents.length > 0 ? mappedEvents : INITIAL_EVENTS,
-      tasks: INITIAL_TASKS,
-      source: mappedEvents.length > 0 ? 'sheet' : 'default'
+      tasks: mappedTasks.length > 0 ? mappedTasks : INITIAL_TASKS,
+      source: 'sheet'
     };
   } catch (err: any) {
     console.error('Fetch Google Sheet Error:', err);
