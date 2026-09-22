@@ -1,74 +1,62 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { SYEvent } from '@/types/event';
-import { INITIAL_EVENTS } from '@/data/mockEvents';
-import { EventCard } from '@/components/EventCard';
-import { EventDetailModal } from '@/components/EventDetailModal';
+import { SYEvent, SYTask, EventTimeStatus } from '@/types/event';
+import { INITIAL_EVENTS, INITIAL_TASKS } from '@/data/mockEvents';
+import { EventItem } from '@/components/EventItem';
+import { KanbanBoard } from '@/components/KanbanBoard';
 import { SheetConfigModal } from '@/components/SheetConfigModal';
 import {
+  Bell,
   Calendar,
-  MapPin,
-  Search,
-  Sparkles,
-  Filter,
   Layers,
-  Settings,
+  Sparkles,
   RefreshCw,
-  HeartHandshake,
-  Info,
-  CalendarCheck,
+  FileSpreadsheet,
   CheckCircle,
-  FileSpreadsheet
+  Hourglass,
+  Clock,
+  User,
+  ExternalLink,
+  PlusCircle,
+  TrendingUp,
+  AlertTriangle
 } from 'lucide-react';
 
-const CATEGORIES = [
-  { id: 'all', label: 'Tất cả chương trình' },
-  { id: 'bieu-dien', label: 'Biểu Diễn & Nghệ Thuật' },
-  { id: 'khoa-hoc', label: 'Khóa Học Thiền' },
-  { id: 'thien-cong-dong', label: 'Thiền Ngoài Trời' },
-  { id: 'workshop', label: 'Workshop Chuyên Đề' },
-  { id: 'sinh-hoat', label: 'Sinh Hoạt Hàng Tuần' },
-];
+export default function InternalBulletinPage() {
+  const [activeTab, setActiveTab] = useState<'events' | 'kanban'>('events');
+  const [timeFilter, setTimeFilter] = useState<'all' | EventTimeStatus>('all');
+  const [selectedKanbanEventId, setSelectedKanbanEventId] = useState<string>('all');
 
-export default function HomePage() {
   const [events, setEvents] = useState<SYEvent[]>(INITIAL_EVENTS);
-  const [selectedEvent, setSelectedEvent] = useState<SYEvent | null>(null);
+  const [tasks, setTasks] = useState<SYTask[]>(INITIAL_TASKS);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedDistrict, setSelectedDistrict] = useState('all');
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<'default' | 'sheet'>('default');
   const [sheetUrl, setSheetUrl] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Load saved Google Sheet URL from LocalStorage if available
+  // Load saved Google Sheet URL
   useEffect(() => {
     const savedUrl = localStorage.getItem('sy_hn_sheet_url');
     if (savedUrl) {
       setSheetUrl(savedUrl);
-      fetchEvents(savedUrl);
+      fetchData(savedUrl);
     }
   }, []);
 
-  const fetchEvents = async (targetUrl?: string) => {
+  const fetchData = async (targetUrl?: string) => {
     setLoading(true);
-    setErrorMessage(null);
     try {
       const urlParam = targetUrl !== undefined ? targetUrl : sheetUrl;
       const res = await fetch(`/api/events${urlParam ? `?sheetUrl=${encodeURIComponent(urlParam)}` : ''}`);
       const data = await res.json();
       if (data.events && Array.isArray(data.events)) {
         setEvents(data.events);
+        if (data.tasks) setTasks(data.tasks);
         setDataSource(data.source);
-        if (data.error) {
-          setErrorMessage(data.error);
-        }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Fetch error:', err);
-      setErrorMessage('Không thể nạp dữ liệu. Đang hiển thị sự kiện mẫu.');
     } finally {
       setLoading(false);
     }
@@ -81,103 +69,104 @@ export default function HomePage() {
     } else {
       localStorage.removeItem('sy_hn_sheet_url');
     }
-    fetchEvents(newUrl);
+    fetchData(newUrl);
   };
 
-  // Districts unique list
-  const districts = useMemo(() => {
-    const list = events.map(e => e.district).filter(Boolean);
-    return ['all', ...Array.from(new Set(list))];
-  }, [events]);
+  const handleUpdateTaskStatus = (taskId: string, newStatus: SYTask['status']) => {
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+  };
 
-  // Filtered Events
+  const handleSwitchToKanban = (eventId: string) => {
+    setSelectedKanbanEventId(eventId);
+    setActiveTab('kanban');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Filtered Events based on Time Status (past / ongoing / upcoming)
   const filteredEvents = useMemo(() => {
-    return events.filter(e => {
-      // Category filter
-      if (selectedCategory !== 'all') {
-        const cat = (e.category || '').toLowerCase();
-        if (!cat.includes(selectedCategory.toLowerCase()) && selectedCategory !== cat) {
-          return false;
-        }
-      }
+    if (timeFilter === 'all') return events;
+    return events.filter(e => e.timeStatus === timeFilter);
+  }, [events, timeFilter]);
 
-      // District filter
-      if (selectedDistrict !== 'all') {
-        if (e.district !== selectedDistrict) return false;
-      }
-
-      // Search query
-      if (searchQuery.trim() !== '') {
-        const q = searchQuery.toLowerCase();
-        const matchTitle = (e.title || '').toLowerCase().includes(q);
-        const matchDesc = (e.description || '').toLowerCase().includes(q);
-        const matchLoc = (e.locationName || '').toLowerCase().includes(q);
-        const matchAddr = (e.address || '').toLowerCase().includes(q);
-        const matchDist = (e.district || '').toLowerCase().includes(q);
-        if (!matchTitle && !matchDesc && !matchLoc && !matchAddr && !matchDist) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [events, selectedCategory, selectedDistrict, searchQuery]);
+  // Statistics
+  const stats = useMemo(() => {
+    const upcomingCount = events.filter(e => e.timeStatus === 'upcoming').length;
+    const ongoingCount = events.filter(e => e.timeStatus === 'ongoing').length;
+    const pastCount = events.filter(e => e.timeStatus === 'past').length;
+    const totalTasks = tasks.length;
+    const doneTasks = tasks.filter(t => t.status === 'done').length;
+    const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
+    return { upcomingCount, ongoingCount, pastCount, totalTasks, doneTasks, inProgressTasks };
+  }, [events, tasks]);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col selection:bg-teal-500 selection:text-white">
-      {/* Top Notification / Ticker */}
-      <div className="bg-gradient-to-r from-teal-700 via-emerald-700 to-teal-800 text-white text-xs py-2 px-4 shadow-sm">
+      {/* Top Internal Banner Bar */}
+      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-800 text-white text-xs py-2 px-4 shadow-sm border-b border-teal-900">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 font-medium">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-300 animate-ping" />
-            <span>Tin mới: Chuỗi sự kiện thiền định & âm nhạc nghệ thuật SEAT Tour 2026 tại Hà Nội</span>
+            <span className="flex h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+            <span className="font-semibold uppercase tracking-wider text-[11px] bg-white/20 px-2 py-0.5 rounded">
+              Truyền Thông Nội Bộ
+            </span>
+            <span>Bảng Điều Phối Hoạt Động & Sự Kiện Sahaja Yoga Hà Nội</span>
           </div>
+
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline opacity-80">Hoàn toàn miễn phí vì lợi ích cộng đồng</span>
+            <span className="hidden sm:inline opacity-80 text-[11px]">
+              Dữ liệu: {dataSource === 'sheet' ? 'Kết nối Google Sheet' : 'Nội bộ mặc định'}
+            </span>
             <button
               onClick={() => setIsConfigOpen(true)}
-              className="inline-flex items-center gap-1 bg-white/20 hover:bg-white/30 px-2.5 py-0.5 rounded text-[11px] font-semibold transition-colors"
+              className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors"
             >
-              <FileSpreadsheet className="w-3 h-3" />
-              <span>{dataSource === 'sheet' ? 'Đang kết nối Sheet' : 'Cấu hình Google Sheet'}</span>
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-300" />
+              <span>{dataSource === 'sheet' ? 'Quản lý Google Sheet' : 'Gắn link Google Sheet'}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Header / Hero */}
-      <header className="relative bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 pt-8 pb-10 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      {/* Main Header */}
+      <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 pt-8 pb-6 px-4 sm:px-6 shadow-sm">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/80 text-teal-700 dark:text-teal-300 text-xs font-semibold uppercase tracking-wider mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/80 text-teal-700 dark:text-teal-300 text-xs font-bold uppercase tracking-wider mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Sahaja Yoga Meditation • Hanoi City</span>
+                <span>Sahaja Yoga Hà Nội • Cổng Thông Tin Ban Điều Phối</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
-                BẢNG TIN SỰ KIỆN <span className="text-teal-600 dark:text-teal-400">HÀ NỘI</span>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
+                BẢNG TIN SỰ KIỆN & TIẾN ĐỘ TRIỂN KHAI
               </h1>
-              <p className="mt-2 text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-                Cập nhật các chương trình biểu diễn âm nhạc cổ điển, lớp học thiền nhập môn, buổi thiền cộng đồng ngoài trời và sinh hoạt tập thể tại khắp các quận/huyện Hà Nội.
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
+                Nơi theo dõi các sự kiện trọng yếu đã / đang / sắp diễn ra, phối hợp liên kết các đầu việc (Kanban) và danh bạ người phụ trách từng hạng mục.
               </p>
             </div>
 
-            {/* Quick Stats or Actions */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="bg-zinc-100 dark:bg-zinc-800/80 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700/60">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số sự kiện</p>
-                <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{events.length}</p>
+            {/* Quick KPIs */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="bg-zinc-100 dark:bg-zinc-800/90 px-4 py-2.5 rounded-2xl border border-zinc-200 dark:border-zinc-700 text-center min-w-[90px]">
+                <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">Sắp diễn ra</p>
+                <p className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100">{stats.upcomingCount}</p>
               </div>
 
-              <div className="bg-zinc-100 dark:bg-zinc-800/80 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700/60">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Khu vực (Quận)</p>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{districts.length - 1}</p>
+              <div className="bg-zinc-100 dark:bg-zinc-800/90 px-4 py-2.5 rounded-2xl border border-zinc-200 dark:border-zinc-700 text-center min-w-[90px]">
+                <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Đang diễn ra</p>
+                <p className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100">{stats.ongoingCount}</p>
+              </div>
+
+              <div className="bg-zinc-100 dark:bg-zinc-800/90 px-4 py-2.5 rounded-2xl border border-zinc-200 dark:border-zinc-700 text-center min-w-[90px]">
+                <p className="text-[11px] font-medium text-teal-600 dark:text-teal-400">Task hoàn thành</p>
+                <p className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100">
+                  {stats.doneTasks}/{stats.totalTasks}
+                </p>
               </div>
 
               <button
-                onClick={() => fetchEvents()}
+                onClick={() => fetchData()}
                 disabled={loading}
-                title="Làm mới dữ liệu từ nguồn"
+                title="Tải lại dữ liệu"
                 className="p-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors"
               >
                 <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin text-teal-600' : ''}`} />
@@ -185,178 +174,169 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Search & Filter Bar */}
-          <div className="mt-8 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700/70 shadow-sm space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              {/* Search text box */}
-              <div className="relative md:col-span-6">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm theo tên sự kiện, nội dung, địa điểm..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 text-zinc-900 dark:text-zinc-100"
-                />
-              </div>
+          {/* Navigation Tabs: [SỰ KIỆN NỘI BỘ] vs [KANBAN CÔNG VIỆC] */}
+          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pt-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setActiveTab('events')}
+                className={`flex items-center gap-2 pb-3 px-2 border-b-2 text-sm font-bold transition-all ${
+                  activeTab === 'events'
+                    ? 'border-teal-600 text-teal-600 dark:text-teal-400'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Bảng Tin Sự Kiện ({events.length})</span>
+              </button>
 
-              {/* District Filter */}
-              <div className="relative md:col-span-3">
-                <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                <select
-                  value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.target.value)}
-                  className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 text-zinc-900 dark:text-zinc-100 appearance-none cursor-pointer"
-                >
-                  <option value="all">Tất cả quận / huyện ({districts.length - 1})</option>
-                  {districts.filter(d => d !== 'all').map(d => (
-                    <option key={d} value={d}>Quận {d}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Reset filter button */}
-              <div className="md:col-span-3 flex items-center justify-end">
-                {(searchQuery || selectedCategory !== 'all' || selectedDistrict !== 'all') && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedCategory('all');
-                      setSelectedDistrict('all');
-                    }}
-                    className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline px-2 py-1"
-                  >
-                    Xóa các bộ lọc
-                  </button>
-                )}
-                <span className="text-xs text-zinc-500 font-medium ml-auto">
-                  Hiển thị: <strong className="text-teal-600 dark:text-teal-400">{filteredEvents.length}</strong> sự kiện
-                </span>
-              </div>
+              <button
+                onClick={() => setActiveTab('kanban')}
+                className={`flex items-center gap-2 pb-3 px-2 border-b-2 text-sm font-bold transition-all ${
+                  activeTab === 'kanban'
+                    ? 'border-teal-600 text-teal-600 dark:text-teal-400'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+                <span>Kanban Công Việc & Liên Kết Task ({tasks.length})</span>
+              </button>
             </div>
 
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
-              <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 flex items-center gap-1 shrink-0 mr-1">
-                <Filter className="w-3.5 h-3.5" />
-                Chủ đề:
-              </span>
-              {CATEGORIES.map(cat => (
+            {/* Time Filter Pills if on 'events' tab */}
+            {activeTab === 'events' && (
+              <div className="hidden sm:flex items-center gap-1.5 pb-2">
+                <span className="text-xs text-zinc-400 font-medium mr-1">Tiến độ:</span>
                 <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
-                    selectedCategory === cat.id
-                      ? 'bg-teal-600 text-white shadow-sm shadow-teal-600/30'
-                      : 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700'
+                  onClick={() => setTimeFilter('all')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    timeFilter === 'all'
+                      ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
                   }`}
                 >
-                  {cat.label}
+                  Tất cả ({events.length})
                 </button>
-              ))}
-            </div>
+                <button
+                  onClick={() => setTimeFilter('upcoming')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    timeFilter === 'upcoming'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
+                  }`}
+                >
+                  Sắp diễn ra ({stats.upcomingCount})
+                </button>
+                <button
+                  onClick={() => setTimeFilter('ongoing')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    timeFilter === 'ongoing'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
+                  }`}
+                >
+                  Đang diễn ra ({stats.ongoingCount})
+                </button>
+                <button
+                  onClick={() => setTimeFilter('past')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    timeFilter === 'past'
+                      ? 'bg-zinc-600 text-white'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200'
+                  }`}
+                >
+                  Đã qua ({stats.pastCount})
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Main Events Grid Area */}
+      {/* Main Content Body */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
-        {/* Banner Alert if Sheet Error */}
-        {errorMessage && (
-          <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Info className="w-4 h-4 shrink-0" />
-              <span>{errorMessage}</span>
+        {activeTab === 'events' ? (
+          <div className="space-y-6">
+            {/* Mobile Time Filter Pills */}
+            <div className="sm:hidden flex items-center gap-1.5 overflow-x-auto pb-1">
+              <button
+                onClick={() => setTimeFilter('all')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold shrink-0 ${
+                  timeFilter === 'all' ? 'bg-zinc-900 text-white' : 'bg-zinc-200 text-zinc-700'
+                }`}
+              >
+                Tất cả ({events.length})
+              </button>
+              <button
+                onClick={() => setTimeFilter('upcoming')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold shrink-0 ${
+                  timeFilter === 'upcoming' ? 'bg-amber-500 text-white' : 'bg-zinc-200 text-zinc-700'
+                }`}
+              >
+                Sắp diễn ra ({stats.upcomingCount})
+              </button>
+              <button
+                onClick={() => setTimeFilter('ongoing')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold shrink-0 ${
+                  timeFilter === 'ongoing' ? 'bg-emerald-600 text-white' : 'bg-zinc-200 text-zinc-700'
+                }`}
+              >
+                Đang diễn ra ({stats.ongoingCount})
+              </button>
+              <button
+                onClick={() => setTimeFilter('past')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold shrink-0 ${
+                  timeFilter === 'past' ? 'bg-zinc-600 text-white' : 'bg-zinc-200 text-zinc-700'
+                }`}
+              >
+                Đã qua ({stats.pastCount})
+              </button>
             </div>
-            <button
-              onClick={() => setIsConfigOpen(true)}
-              className="text-xs font-bold underline ml-4 hover:opacity-80"
-            >
-              Kiểm tra cấu hình Sheet
-            </button>
-          </div>
-        )}
 
-        {filteredEvents.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-zinc-900 rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-8">
-            <Layers className="w-12 h-12 text-zinc-400 mx-auto mb-4 stroke-1" />
-            <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">
-              Không tìm thấy sự kiện phù hợp
-            </h3>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-              Hãy thử thay đổi từ khóa tìm kiếm hoặc chọn lại bộ lọc Phân loại và Khu vực quận/huyện.
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-                setSelectedDistrict('all');
-              }}
-              className="mt-5 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold transition-all"
-            >
-              Xem lại tất cả sự kiện
-            </button>
+            {/* Event List */}
+            <div className="space-y-4">
+              {filteredEvents.map(event => (
+                <EventItem
+                  key={event.id}
+                  event={event}
+                  onViewTasks={handleSwitchToKanban}
+                />
+              ))}
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map(event => (
-              <EventCard
-                key={event.id}
-                event={event}
-                onSelect={(evt) => setSelectedEvent(evt)}
-              />
-            ))}
-          </div>
+          <KanbanBoard
+            tasks={tasks}
+            events={events}
+            selectedEventId={selectedKanbanEventId}
+            onSelectEventId={setSelectedKanbanEventId}
+            onUpdateTaskStatus={handleUpdateTaskStatus}
+          />
         )}
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-10 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-500 dark:text-zinc-400">
-          <div>
-            <p className="font-bold text-zinc-800 dark:text-zinc-200">
-              Bảng Tin Sahaja Yoga Hà Nội
-            </p>
-            <p className="text-xs mt-1">
-              Hệ thống thông tin chính thức về các hoạt động thiền định & âm nhạc Sahaja Yoga tại thủ đô Hà Nội.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
-            <a
-              href="https://sahajayogavietnam.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-600 transition-colors"
-            >
-              Trang chủ Sahaja Yoga VN
-            </a>
-            <span>•</span>
-            <a
-              href="https://facebook.com/sahajayogavietnam"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-600 transition-colors"
-            >
-              Fanpage Facebook
-            </a>
-            <span>•</span>
+      <footer className="mt-auto bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-8 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+          <p>© 2026 Sahaja Yoga Việt Nam • Hệ Thống Điều Phối & Bảng Tin Nội Bộ Hà Nội</p>
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setIsConfigOpen(true)}
-              className="hover:text-teal-600 transition-colors flex items-center gap-1"
+              className="hover:text-teal-600 underline font-medium"
             >
-              <Settings className="w-3.5 h-3.5" />
-              <span>Nguồn Google Sheet</span>
+              Cấu hình Google Sheet
             </button>
+            <span>•</span>
+            <a
+              href="https://github.com/sahajayogavn/bang-tin-syhn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-teal-600"
+            >
+              GitHub Repository
+            </a>
           </div>
         </div>
       </footer>
-
-      {/* Event Details Modal */}
-      <EventDetailModal
-        event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-      />
 
       {/* Google Sheet Config Modal */}
       <SheetConfigModal

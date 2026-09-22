@@ -1,23 +1,36 @@
+export type EventTimeStatus = 'past' | 'ongoing' | 'upcoming';
+
+export interface SYTask {
+  id: string;
+  eventId: string;
+  title: string;
+  description?: string;
+  assignee: string; // Tên người phụ trách
+  assigneePhone?: string; // SĐT liên hệ
+  status: 'todo' | 'in_progress' | 'review' | 'done';
+  priority?: 'high' | 'medium' | 'low';
+  dueDate?: string;
+  dependsOn?: string[]; // IDs của các task tiền đề (task này phụ thuộc vào task nào)
+  deliverable?: string; // Kết quả bàn giao (link doc, file thiết kế, công văn...)
+}
+
 export interface SYEvent {
   id: string;
   title: string;
-  subtitle?: string;
-  category: string; // 'bieu-dien' | 'khoa-hoc' | 'thien-cong-dong' | 'workshop' | 'sinh-hoat'
-  categoryLabel?: string;
-  startDate: string; // e.g. "2026-10-15" or "15/10/2026"
+  timeStatus: EventTimeStatus; // 'past' | 'ongoing' | 'upcoming'
+  timeStatusLabel?: string;
+  startDate: string;
   endDate?: string;
-  time: string; // e.g. "19:30 - 21:30"
+  time: string;
   locationName: string;
   address: string;
-  district: string; // e.g. "Hoàn Kiếm", "Cầu Giấy", "Tây Hồ", "Đống Đa", "Hà Đông"
-  mapUrl?: string;
-  description: string;
-  targetAudience?: string; // "Dành cho người mới bắt đầu", "Mọi lứa tuổi", "Thiền sinh Sahaja Yoga"
-  fee?: string; // "Miễn phí 100%"
-  registrationUrl?: string;
-  contactPhone?: string;
-  contactName?: string;
-  bannerUrl?: string;
-  highlightTag?: string; // "ĐẶC BIỆT", "SẮP DIỄN RA", "NỔI BẬT"
-  status?: 'upcoming' | 'ongoing' | 'completed';
+  district: string;
+  coordinator: string; // Người phụ trách chính sự kiện
+  coordinatorPhone: string;
+  importance: 'critical' | 'high' | 'normal'; // Mức độ quan trọng
+  badge?: string; // "Ưu tiên số 1", "Trọng tâm tháng 10"
+  summary: string;
+  details: string; // Chi tiết khi expand ra
+  checklistSummary?: string;
+  tasks?: SYTask[];
 }
